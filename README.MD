@@ -58,6 +58,8 @@ Asegúrate de tener las siguientes dependencias en tu archivo `pom.xml`:
 </project>
 ```
 
+> **Nota:** el `pom.xml` de este repositorio ya viene configurado (no necesitas crearlo desde cero). Además de RxJava y Reactor, incluye Spring Boot y `spring-boot-starter-webflux`, usados en el ejemplo adicional de la sección "Bono: API reactiva con Spring WebFlux" al final de este documento.
+
 ## Paso 2: Ejemplos de Operadores en RxJava
 
 ### 1. `map`
@@ -289,9 +291,7 @@ public class CustomExample {
                 new Order("Product C", 3, 20.0)
         );
 
-       
-
- Observable.fromIterable(orders)
+        Observable.fromIterable(orders)
                 .filter(order -> "Product A".equals(order.getProduct())) // Filtrar por Producto A
                 .map(order -> order.getQuantity() * order.getPrice()) // Calcular el total por pedido
                 .reduce(Double::sum) // Calcular el total de ventas para Producto A
@@ -314,9 +314,36 @@ La programación reactiva es una poderosa herramienta para manejar flujos de dat
 
 ## Ejecución del Taller
 
-1. Configura tu entorno de desarrollo con las dependencias necesarias.
-2. Implementa y ejecuta cada ejemplo de operador en RxJava y Reactor.
-3. Crea y comparte tu propio ejemplo utilizando los operadores aprendidos.
+1. Configura tu entorno de desarrollo con las dependencias necesarias (o simplemente clona este repositorio, que ya trae el `pom.xml` configurado).
+2. Ejecuta los ejemplos consolidados de operadores incluidos en `src/main/java/com/example/`:
+
+    ```bash
+    mvn compile
+    mvn exec:java -Dexec.mainClass=com.example.RxJavaExample
+    mvn exec:java -Dexec.mainClass=com.example.ReactorExample
+    ```
+
+3. Crea y comparte tu propio ejemplo utilizando los operadores aprendidos (ver "Paso 4: Crear un Ejemplo Propio").
 4. Experimenta con otros operadores y casos de uso para profundizar en tu comprensión de la programación reactiva.
 
 Este taller proporciona una base sólida para comenzar a trabajar con operadores en programación reactiva y fomenta la creación de ejemplos propios para reforzar el aprendizaje.
+
+## Bono: API reactiva con Spring WebFlux
+
+Además de los ejemplos de consola, este repositorio incluye una pequeña aplicación Spring Boot (`ReactiveSpringExampleApplication`) con un controlador reactivo (`ReactiveController`) que expone tres endpoints usando `Mono` y `Flux` directamente sobre HTTP — la forma en que la programación reactiva se usa típicamente en un servicio web real.
+
+Para levantarla:
+
+```bash
+mvn spring-boot:run
+```
+
+Y en otra terminal, prueba los endpoints:
+
+```bash
+curl http://localhost:8080/reactive/hello   # "Hello, Reactive!"
+curl http://localhost:8080/reactive/mono    # "Hello, Mono!"  (Mono<String>)
+curl http://localhost:8080/reactive/flux    # "Hello, Flux!"  (Flux<String>)
+```
+
+Como reto adicional, intenta agregar un nuevo endpoint que use `Flux` para emitir varios elementos (por ejemplo, una lista) y aplícale alguno de los operadores vistos en este taller (`map`, `filter`, etc.) antes de devolverlo.
