@@ -1,0 +1,43 @@
+name: CI
+
+# Cuándo se ejecuta: en cada push (a cualquier rama), en cada Pull Request hacia main
+# y manualmente desde la pestaña Actions (workflow_dispatch).
+on:
+  push:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Principio de mínimo privilegio: el pipeline solo necesita leer el código.
+permissions:
+  contents: read
+
+jobs:
+  build-y-pruebas:
+    name: Build y pruebas
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v7
+
+      - name: Instalar Java 21 (con caché de dependencias Maven)
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      # verify = compilar + ejecutar las pruebas (JUnit 5 + StepVerifier) + empaquetar.
+      # Si una prueba falla, este paso falla y el pipeline queda en rojo.
+      - name: Compilar y probar
+        run: mvn -B verify
+
+      # if: always() -> se suben los reportes incluso si las pruebas fallaron (para poder revisar la causa del fallo).
+      - name: Publicar reportes de pruebas
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: reportes
+          path: target/surefire-reports/
+          if-no-files-found: ignore
